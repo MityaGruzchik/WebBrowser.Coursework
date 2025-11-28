@@ -1,4 +1,4 @@
-﻿using Microsoft.Web.WebView2.Wpf;
+﻿using WebBrowser.Coursework.Factories; // Щоб бачити WebPageContent
 
 namespace WebBrowser.Coursework.Patterns
 {
@@ -6,9 +6,10 @@ namespace WebBrowser.Coursework.Patterns
     {
         public string Url { get; set; }
         public int StatusCode { get; set; }
-        public WebView2 Browser { get; set; } // Посилання на компонент браузера для керування ним
 
-        // Допоміжний метод для відображення HTML (для сторінок помилок)
+        // ВИПРАВЛЕННЯ: Замість WebView2 Browser використовуємо наш клас
+        public WebPageContent PageContent { get; set; }
+
         public void RenderHtml(string title, string message, string color)
         {
             string html = $@"
@@ -21,7 +22,8 @@ namespace WebBrowser.Coursework.Patterns
                 </body>
                 </html>";
 
-            Browser.NavigateToString(html);
+            // ВИПРАВЛЕННЯ: Викликаємо наш новий метод LoadHtml
+            PageContent.LoadHtml(html);
         }
     }
 }

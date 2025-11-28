@@ -62,12 +62,11 @@ namespace WebBrowser.Coursework.Patterns
     {
         public override void Handle(RequestContext ctx)
         {
-            if (ctx.StatusCode >= 200 && ctx.StatusCode < 300)
+            if (ctx.StatusCode >= 200 && ctx.StatusCode < 400)
             {
-                if (ctx.Browser.Source?.ToString() != ctx.Url)
-                {
-                    ctx.Browser.Source = new System.Uri(ctx.Url);
-                }
+                // ВИПРАВЛЕННЯ: Замість ctx.Browser.Source...
+                // Ми викликаємо метод Load нашого компонента
+                ctx.PageContent.Load(ctx.Url);
             }
             else
             {

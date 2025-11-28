@@ -76,7 +76,8 @@
 
             <GridSplitter Grid.Column="1" Width="1" Background="#dee2e6" HorizontalAlignment="Center"/>
 
-            <wv2:WebView2 x:Name="BrowserView" Grid.Column="2" Source="https://www.google.com"/>
+            <ContentControl x:Name="MainContentContainer" Grid.Column="2" />
+
         </Grid>
     </Grid>
 </Window>
