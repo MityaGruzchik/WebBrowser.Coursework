@@ -1,0 +1,82 @@
+﻿<Window x:Class="WebBrowser.Coursework.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d"
+        Title="Web Browser (Lab 3 Architecture)" Height="720" Width="1280" 
+        WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#f8f9fa" BorderBrush="#dee2e6" BorderThickness="0,0,0,1" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" Grid.Column="0" Margin="0,0,15,0">
+                    <Button x:Name="BtnBack" Content="🡠" Width="35" Click="BtnBack_Click" Margin="0,0,5,0" Background="Transparent" BorderThickness="0"/>
+                    <Button x:Name="BtnForward" Content="🡢" Width="35" Click="BtnForward_Click" Margin="0,0,5,0" Background="Transparent" BorderThickness="0"/>
+                    <Button x:Name="BtnRefresh" Content="⟳" Width="35" Click="BtnRefresh_Click" Background="Transparent" BorderThickness="0"/>
+                </StackPanel>
+
+                <Border Grid.Column="1" Background="White" CornerRadius="15" BorderBrush="#ced4da" BorderThickness="1" Padding="10,0">
+                    <TextBox x:Name="AddressBar" BorderThickness="0" VerticalContentAlignment="Center" FontSize="14" 
+                             KeyDown="AddressBar_KeyDown" Text="https://www.google.com"/>
+                </Border>
+                <Button Grid.Column="1" HorizontalAlignment="Right" Content="Go" Width="40" Margin="0,0,5,0" 
+                        Background="Transparent" BorderThickness="0" Click="BtnGo_Click"/>
+
+                <StackPanel Orientation="Horizontal" Grid.Column="2" Margin="15,0,0,0">
+                    <Button x:Name="BtnAddBookmark" Content="★" ToolTip="Додати в закладки" Width="35" Click="BtnAddBookmark_Click" Margin="0,0,5,0"/>
+                    <Button x:Name="BtnViewSource" Grid.Column="3" Content="📄 HTML Code" Margin="5,0,0,0" Padding="10,0" Height="30" Click="BtnViewSource_Click" ToolTip="Завантажити HTML код сторінки (через Proxy)"/>
+        
+        
+        
+
+                    <Button x:Name="BtnOpenHistory" Content="📂 Менеджер історії" Padding="10,0" Background="#e8f0fe" BorderBrush="#1a73e8" Foreground="#1a73e8" FontWeight="SemiBold" Click="BtnOpenHistory_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" Background="White">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Швидкі закладки" FontWeight="Bold" Margin="10" Foreground="#5f6368"/>
+
+                <ListBox x:Name="ListBookmarks" Grid.Row="1" BorderThickness="0" Margin="5" MouseDoubleClick="ListBookmarks_MouseDoubleClick">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,5">
+                                <TextBlock Text="{Binding Title}" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="{Binding Url}" FontSize="11" Foreground="Gray" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+
+            <GridSplitter Grid.Column="1" Width="1" Background="#dee2e6" HorizontalAlignment="Center"/>
+
+            <wv2:WebView2 x:Name="BrowserView" Grid.Column="2" Source="https://www.google.com"/>
+        </Grid>
+    </Grid>
+</Window>
