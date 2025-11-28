@@ -2,34 +2,30 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Threading.Tasks;
-using System.Net.Http; // Для перевірки статусів (Lab 5)
-using Microsoft.Web.WebView2.Wpf; // Для кастингу типів
+using System.Net.Http; 
+using Microsoft.Web.WebView2.Wpf; 
 using WebBrowser.Coursework.Entities;
 using WebBrowser.Coursework.Managers;
 using WebBrowser.Coursework.Repositories;
 using WebBrowser.Coursework.Views;
-using WebBrowser.Coursework.Services; // Proxy
-using WebBrowser.Coursework.Factories; // Factory Method (Lab 6)
-using WebBrowser.Coursework.Patterns;  // Chain of Responsibility (Lab 5)
+using WebBrowser.Coursework.Services; 
+using WebBrowser.Coursework.Factories; 
+using WebBrowser.Coursework.Patterns; 
 
 namespace WebBrowser.Coursework
 {
     public partial class MainWindow : Window
     {
-        // Рядок підключення (перевірте пароль!)
+        
         private const string ConnString = "Host=localhost;Username=postgres;Password=12345;Database=browser_db";
 
-        // --- Архітектурні компоненти ---
         private readonly HistoryManager _historyManager;
         private readonly IRepository<Bookmark> _bookmarkRepo;
 
-        // Lab 4: Proxy
         private readonly IPageLoader _pageLoader = new SmartProxy();
 
-        // Lab 6: Factory Method
         private readonly ContentFactory _contentFactory = new ContentFactory();
 
-        // Поточний контент вкладки (може бути Web або Internal)
         private IBrowserContent _currentContent;
 
         public MainWindow()
@@ -38,15 +34,12 @@ namespace WebBrowser.Coursework
 
             try
             {
-                // Ініціалізація шарів даних та логіки
                 var historyRepo = new HistoryRepository(ConnString);
                 _bookmarkRepo = new BookmarkRepository(ConnString);
                 _historyManager = new HistoryManager(historyRepo);
 
-                // Завантаження закладок у бічну панель
                 LoadBookmarksSidePanel();
 
-                // Завантаження стартової сторінки
                 AddressBar.Text = "https://www.google.com";
                 NavigateToUrl();
             }
@@ -56,16 +49,11 @@ namespace WebBrowser.Coursework
             }
         }
 
-        // =========================================================
-        // ГОЛОВНА ЛОГІКА НАВІГАЦІЇ (Factory + Chain)
-        // =========================================================
-
         private async void NavigateToUrl()
         {
             var url = AddressBar.Text;
             if (string.IsNullOrWhiteSpace(url)) return;
 
-            // Валідація протоколу
             if (!url.StartsWith("browser://") && !url.StartsWith("http"))
             {
                 url = "https://" + url;
@@ -73,26 +61,18 @@ namespace WebBrowser.Coursework
 
             try
             {
-                // КРОК 1 (Lab 6): Фабрика створює контент залежно від URL
-                // Якщо це "browser://about" -> InternalPageContent
-                // Якщо це "http://google.com" -> WebPageContent
                 _currentContent = _contentFactory.CreateContent(url);
 
-                // Відображаємо створений елемент у вікні (Dynamic UI)
                 MainContentContainer.Content = _currentContent.GetVisualElement();
 
-                // КРОК 2: Розгалуження логіки залежно від типу контенту
                 if (_currentContent is WebPageContent webContent)
                 {
-                    // --- ЛОГІКА ДЛЯ ВЕБ-САЙТІВ (Lab 5: Chain of Responsibility) ---
 
-                    // 2.1. Перевіряємо статус код через HttpClient
                     int statusCode = 0;
                     try
                     {
                         using (var client = new HttpClient())
                         {
-                            // HEAD запит швидший, бо не качає тіло сторінки
                             var request = new HttpRequestMessage(HttpMethod.Head, url);
                             var response = await client.SendAsync(request);
                             statusCode = (int)response.StatusCode;
@@ -100,11 +80,9 @@ namespace WebBrowser.Coursework
                     }
                     catch
                     {
-                        // Якщо помилка мережі, імітуємо 404 або 500 для тесту ланцюжка
                         statusCode = 404;
                     }
 
-                    // 2.2. Налаштування Ланцюжка
                     var hRedirect = new RedirectHandler();
                     var hClientError = new ClientErrorHandler();
                     var hServerError = new ServerErrorHandler();
@@ -112,36 +90,27 @@ namespace WebBrowser.Coursework
 
                     hRedirect.SetNext(hClientError).SetNext(hServerError).SetNext(hSuccess);
 
-                    // 2.3. Створення контексту запиту
                     var context = new RequestContext
                     {
                         Url = url,
                         StatusCode = statusCode,
-                        PageContent = webContent // Передаємо об'єкт для відображення помилок/контенту
+                        PageContent = webContent 
                     };
 
-                    // 2.4. Запуск ланцюжка
-                    // Обробники самі вирішать: показати HTML помилки чи нічого не робити
                     hRedirect.Handle(context);
 
-                    // 2.5. Якщо статус ОК (2xx), то SuccessHandler дозволяє завантаження
-                    // (Або якщо це редірект 3xx, який WebView2 обробить сам)
                     if (statusCode >= 200 && statusCode < 400)
                     {
-                        webContent.Load(url); // Реальне завантаження у WebView2
+                        webContent.Load(url); 
 
-                        // Збереження в історію (Lab 2/3)
                         _historyManager.AddEntry("Web Page", url);
                     }
                 }
                 else
                 {
-                    // --- ЛОГІКА ДЛЯ СЛУЖБОВИХ СТОРІНОК (Internal) ---
-                    // Тут не потрібен HttpClient і ланцюжок перевірок
                     _currentContent.Load(url);
                 }
 
-                // Оновлюємо рядок адреси (для краси)
                 AddressBar.Text = url;
             }
             catch (Exception ex)
@@ -150,9 +119,6 @@ namespace WebBrowser.Coursework
             }
         }
 
-        // =========================================================
-        // ОБРОБНИКИ ПОДІЙ ІНТЕРФЕЙСУ
-        // =========================================================
 
         private void BtnGo_Click(object sender, RoutedEventArgs e)
         {
@@ -164,7 +130,6 @@ namespace WebBrowser.Coursework
             if (e.Key == Key.Enter) NavigateToUrl();
         }
 
-        // Допоміжний метод для отримання WebView2, якщо він зараз активний
         private WebView2 GetCurrentWebView()
         {
             if (_currentContent is WebPageContent webContent)
@@ -190,7 +155,7 @@ namespace WebBrowser.Coursework
         {
             var wv = GetCurrentWebView();
             if (wv != null) wv.Reload();
-            else NavigateToUrl(); // Для текстових сторінок просто перезавантажуємо
+            else NavigateToUrl(); 
         }
 
         private void BtnOpenHistory_Click(object sender, RoutedEventArgs e)
@@ -200,9 +165,6 @@ namespace WebBrowser.Coursework
             historyWindow.Show();
         }
 
-        // =========================================================
-        // ЛОГІКА ЗАКЛАДОК (Lab 2)
-        // =========================================================
 
         private void BtnAddBookmark_Click(object sender, RoutedEventArgs e)
         {
@@ -211,7 +173,6 @@ namespace WebBrowser.Coursework
                 string title = "New Page";
                 string url = AddressBar.Text;
 
-                // Спробуємо дістати реальний заголовок з WebView2
                 var wv = GetCurrentWebView();
                 if (wv != null && wv.CoreWebView2 != null)
                 {
@@ -242,7 +203,7 @@ namespace WebBrowser.Coursework
             {
                 ListBookmarks.ItemsSource = _bookmarkRepo.GetAll();
             }
-            catch { /* Ігноруємо помилки під час завантаження UI */ }
+            catch {  }
         }
 
         private void ListBookmarks_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -254,9 +215,6 @@ namespace WebBrowser.Coursework
             }
         }
 
-        // =========================================================
-        // ЛОГІКА PROXY (Lab 4)
-        // =========================================================
 
         private async void BtnViewSource_Click(object sender, RoutedEventArgs e)
         {
@@ -272,7 +230,6 @@ namespace WebBrowser.Coursework
             BtnViewSource.Content = "Wait...";
             BtnViewSource.IsEnabled = false;
 
-            // Виклик через Proxy (кешування)
             string htmlContent = await Task.Run(() =>
             {
                 return _pageLoader.DownloadHtml(url);

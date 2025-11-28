@@ -8,7 +8,6 @@ namespace WebBrowser.Coursework.Views
     {
         private readonly HistoryManager _historyManager;
 
-        // Ми передаємо Менеджер у вікно, а не створюємо його тут
         public HistoryWindow(HistoryManager manager)
         {
             InitializeComponent();
@@ -30,7 +29,6 @@ namespace WebBrowser.Coursework.Views
             }
             else
             {
-                // Виклик бізнес-логіки пошуку
                 HistoryGrid.ItemsSource = _historyManager.Search(query);
             }
         }

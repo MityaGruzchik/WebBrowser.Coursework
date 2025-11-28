@@ -10,7 +10,6 @@ namespace WebBrowser.Coursework.Managers
     {
         private readonly IRepository<HistoryItem> _repository;
 
-        // Dependency Injection через конструктор
         public HistoryManager(IRepository<HistoryItem> repository)
         {
             _repository = repository;
@@ -32,7 +31,6 @@ namespace WebBrowser.Coursework.Managers
             return _repository.GetAll();
         }
 
-        // Приклад бізнес-логіки: пошук в історії
         public IEnumerable<HistoryItem> Search(string query)
         {
             var all = _repository.GetAll();
@@ -42,8 +40,6 @@ namespace WebBrowser.Coursework.Managers
 
         public void ClearAllHistory()
         {
-            // У реальному проєкті тут має бути метод DeleteAll в репозиторії.
-            // Для прикладу видаляємо по одному (через наявний контракт IRepository)
             var all = _repository.GetAll();
             foreach (var item in all)
             {

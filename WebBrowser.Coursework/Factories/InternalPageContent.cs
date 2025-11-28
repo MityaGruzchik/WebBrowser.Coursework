@@ -18,7 +18,6 @@ namespace WebBrowser.Coursework.Factories
 
         public void Load(string url)
         {
-            // Парсимо "команду" з URL (наприклад, browser://about)
             string command = url.Replace("browser://", "").ToLower();
 
             switch (command)

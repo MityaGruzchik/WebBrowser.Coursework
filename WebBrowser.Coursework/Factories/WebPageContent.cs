@@ -24,7 +24,6 @@ namespace WebBrowser.Coursework.Factories
             }
         }
 
-        // --- ДОДАНО ЦЕЙ МЕТОД ДЛЯ ВИПРАВЛЕННЯ ПОМИЛКИ ---
         public async void LoadHtml(string html)
         {
             await _webView.EnsureCoreWebView2Async();

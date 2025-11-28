@@ -57,15 +57,12 @@ namespace WebBrowser.Coursework.Patterns
         }
     }
 
-    // 4. Успішне завантаження (200 OK)
     public class SuccessHandler : BaseHandler
     {
         public override void Handle(RequestContext ctx)
         {
             if (ctx.StatusCode >= 200 && ctx.StatusCode < 400)
             {
-                // ВИПРАВЛЕННЯ: Замість ctx.Browser.Source...
-                // Ми викликаємо метод Load нашого компонента
                 ctx.PageContent.Load(ctx.Url);
             }
             else
